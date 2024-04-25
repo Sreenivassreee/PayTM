@@ -6,6 +6,7 @@ const User = require('../models/userModel')
 const { JwtGenerate } = require('../utils/jwtGenerate')
 const signInSchema = require('../zod/signIn')
 const authMiddleware = require('../middlewares/authMiddleware')
+const { updateSchema } = require('../zod/update')
 router.post("/signup", async (req, res) => {
    try {
       const { firstName, lastName, mail, password } = req.body;
@@ -41,7 +42,7 @@ router.post("/signIn", async (req, res) => {
       const user = await User.findOne({ mail })
       const validate = signInSchema.safeParse(req.body)
       if (!validate.success) {
-         return res.status(400).json({ message: validate.error})
+         return res.status(400).json({ message: validate.error })
       }
 
       if (!user) {
@@ -59,8 +60,20 @@ router.post("/signIn", async (req, res) => {
    }
 })
 
-router.get("/test",authMiddleware,(req,res)=>{
-   console.log(req.userId)
-   return res.status(200).json({req:req.userId})
+router.get("/updateuser", authMiddleware, async (req, res) => {
+   try {
+
+      const { success, error } = updateSchema.safeParse(req.body)
+      if (!success) {
+         return res.status(400).json({
+            message: error
+         })
+      }
+      const updateUser = await User.updateOne({ _id: req.userId }, req.body)
+      return res.status(200).json({ req: req.userId })
+
+   } catch (error) {
+      return res.status(400).json({ error })
+   }
 })
 module.exports = router;
