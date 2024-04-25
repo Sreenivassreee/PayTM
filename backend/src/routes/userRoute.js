@@ -5,6 +5,7 @@ const signUpSchema = require('../zod/signUp')
 const User = require('../models/userModel')
 const { JwtGenerate } = require('../utils/jwtGenerate')
 const signInSchema = require('../zod/signIn')
+const authMiddleware = require('../middlewares/authMiddleware')
 router.post("/signup", async (req, res) => {
    try {
       const { firstName, lastName, mail, password } = req.body;
@@ -58,4 +59,8 @@ router.post("/signIn", async (req, res) => {
    }
 })
 
+router.get("/test",authMiddleware,(req,res)=>{
+   console.log(req.userId)
+   return res.status(200).json({req:req.userId})
+})
 module.exports = router;
