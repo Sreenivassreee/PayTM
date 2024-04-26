@@ -7,6 +7,7 @@ const { JwtGenerate } = require('../utils/jwtGenerate')
 const signInSchema = require('../zod/signIn')
 const authMiddleware = require('../middlewares/authMiddleware')
 const { updateSchema } = require('../zod/update')
+const Account = require('../models/accountModel')
 router.post("/signup", async (req, res) => {
    try {
       const { firstName, lastName, mail, password } = req.body;
@@ -25,6 +26,7 @@ router.post("/signup", async (req, res) => {
          })
       }
       const createdUser = await User.create({ firstName, lastName, mail, password })
+      await Account.create({ userId: createdUser._id, balance: 1 + Math.random() * 10000 })
       createdUser.password = null
       var token = JwtGenerate({ firstName: createdUser.firstName, lastName: createdUser.lastName, mail, _id: createdUser._id });
 
