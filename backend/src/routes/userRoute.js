@@ -66,14 +66,35 @@ router.get("/updateuser", authMiddleware, async (req, res) => {
       const { success, error } = updateSchema.safeParse(req.body)
       if (!success) {
          return res.status(400).json({
-            message: error
+            message: "Error while updating information",
+            error
          })
       }
       const updateUser = await User.updateOne({ _id: req.userId }, req.body)
-      return res.status(200).json({ req: req.userId })
+      return res.status(200).json({ message: "Updated successfully" })
 
    } catch (error) {
-      return res.status(400).json({ error })
+      return res.status(400).json({ message: "Error while updating information", error })
    }
 })
+
+router.get('/bulk', async (req, res) => {
+   const filter = req.query.filter;
+   const usersData = await User.find(
+      {
+
+         $or: [
+            { firstName: { $regex: filter, $options: 'i' } },
+            { lastName: { $regex: filter, $options: 'i' } }
+         ]
+
+
+
+      }
+   )
+
+   return res.send({ usersData: [...usersData.map((user) => ({ firstName: user.firstName, lastName: user.lastName, _id: user._id, mail: user.mail }))] })
+})
+
+
 module.exports = router;
